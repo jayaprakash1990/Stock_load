@@ -6,6 +6,7 @@ const moment = require("moment");
 const { StockModel, addTick } = require("./stock-model");
 const { Stock15Model, add15Tick } = require("./stock-model-15");
 const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
+const fs = require("fs");
 
 const bodyParser = require("body-parser");
 
@@ -563,6 +564,13 @@ app.get("/testCall", function (req, res) {
     });
 });
 /////////////////////////////////////////////////////
+
+app.get("/writeInCsv/:value", function (req, res) {
+  let value = req.params.value;
+  fs.appendFileSync("testSample.csv", value);
+  res.json({ result: "success" });
+});
+////////////////////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
