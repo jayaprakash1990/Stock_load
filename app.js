@@ -6,7 +6,9 @@ const moment = require("moment");
 const { StockModel, addTick } = require("./stock-model");
 const { Stock15Model, add15Tick } = require("./stock-model-15");
 const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
+const { ticksLoad } = require("./ticks-load");
 const fs = require("fs");
+const generic = require("./generic");
 
 const bodyParser = require("body-parser");
 
@@ -39,6 +41,19 @@ app.use(function (req, res, next) {
 });
 
 process.env.TZ = "Asia/Kolkata";
+
+///////////////////////////Load Ticks
+
+ticksLoad();
+
+global.tokenReturn = () => {
+  // const contents = fs.readFileSync('./sessionToken.json', 'utf8');
+  const contents = fs.readFileSync("./sessionToken.json", "utf8");
+  const jsonValue = JSON.parse(contents);
+  let tokenReturnValue =
+    "token " + jsonValue.api_key + ":" + jsonValue.access_token;
+  return tokenReturnValue;
+};
 
 app.get("/getData", function (req, res) {
   const count = 1437;
@@ -571,6 +586,29 @@ app.get("/writeInCsv/:value", function (req, res) {
   res.json({ result: "success" });
 });
 ////////////////////////////////////////////////////
+app.use("/token/:id", (req, res) => {
+  console.log("req.params.tokenValue ", req.params.id);
+  let jsonValue = {};
+  // delete_stock_count();
+  // helper.remove_stock();
+  // helper.remove_intra_stock();
+  generic.kc
+    .generateSession(req.params.id, generic.apiSecret)
+    .then(function (response) {
+      //  console.log(response);
+      fs.writeFileSync("sessionToken.json", JSON.stringify(response));
+      // intial_stock_count();
+      jsonValue = { refreshStatus: true };
+
+      res.json(jsonValue);
+    })
+    .catch(function (err) {
+      console.log(err);
+      jsonValue = { refreshStatus: false };
+      res.json(jsonValue);
+    });
+});
+////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
