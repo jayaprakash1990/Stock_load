@@ -3,6 +3,7 @@ const generic = require("./generic");
 const { TickModel, addTick, TickSchema } = require("./model");
 const sessionToken = require("./sessionToken.json");
 const { niftyFiftyItems } = require("./nifty-array");
+
 let ticker;
 
 exports.ticksLoad = () => {
@@ -11,8 +12,6 @@ exports.ticksLoad = () => {
     api_key: "ab1p4zkauvkxy4gt",
     access_token: sessionToken.access_token,
   });
-
-  console.log(11111111111);
 
   ticker.autoReconnect(true, 10, 5);
   ticker.connect();

@@ -9,12 +9,15 @@ const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
 const { ticksLoad } = require("./ticks-load");
 const fs = require("fs");
 const generic = require("./generic");
+const { liveStocksCheckAndBuy } = require("./live-spread-stock");
 const {
   testCheckLowReversal,
   checkLowRev,
   testCheckHighReversl,
   checkHighRev,
 } = require("./spread-test");
+const schedule = require("node-schedule");
+const { testManipulation } = require("./test-manipulation");
 
 const { fetchVolumDataByStock } = require("./fetchTickData");
 
@@ -61,6 +64,21 @@ global.tokenReturn = () => {
   let tokenReturnValue =
     "token " + jsonValue.api_key + ":" + jsonValue.access_token;
   return tokenReturnValue;
+};
+
+global.config = {
+  headers: {
+    "X-Kite-Version": "3",
+    Authorization: tokenReturn(),
+  },
+};
+
+global.roundDownCalcualtion = (price) => {
+  return Math.floor(price * 20) / 20;
+};
+
+global.roundUpCalcualtion = (price) => {
+  return Math.ceil(price * 20) / 20;
 };
 
 app.get("/getData", function (req, res) {
@@ -226,7 +244,23 @@ app.get(
     fetchVolumDataByStock(req, res);
   }
 );
+/////////////////////////////////////////////////////////////////
 
+const triggerSpreadStockBuy = schedule.scheduleJob(
+  "00 16 09 * * *",
+  async function () {
+    liveStocksCheckAndBuy();
+  }
+);
+////////////////////////////////////////////////////
+// const triggerSpreadStockBuy = schedule.scheduleJob(
+//   "*/15 * * * * *",
+//   async function () {
+//     liveStocksCheckAndBuy();
+//   }
+// );
+
+// callTriggerStopLossScheduler();
 /////////////////////////////////////////////////
 
 app.listen(port, () =>
