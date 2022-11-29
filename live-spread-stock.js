@@ -20,8 +20,6 @@ const targetPlValue = 2500;
 const symbolStopLossStatus = {
   TATAMOTORS: false,
   SBIN: false,
-  RELIANCE: false,
-  TCS: false,
 };
 
 exports.liveStocksCheckAndBuy = () => {
@@ -66,10 +64,10 @@ exports.liveStocksCheckAndBuy = () => {
 
 let stopLossTriggerScheduler;
 
-exports.callTriggerStopLossScheduler = () => {
+const callTriggerStopLossScheduler = () => {
   const triggerStopLossCount = 0;
   stopLossTriggerScheduler = schedule.scheduleJob(
-    "*/5 * * * * *",
+    "*/2 * * * * *",
     async function () {
       const url = "https://api.kite.trade/orders";
 
@@ -77,9 +75,46 @@ exports.callTriggerStopLossScheduler = () => {
       try {
         let tmpResult = await axios.get(url, config);
         let results = tmpResult.data.data;
+        results.forEach((result) => {
+          if (
+            result.status === "COMPLETE" &&
+            !symbolStopLossStatus[result.tradingsymbol]
+          ) {
+            symbolStopLossStatus[result.tradingsymbol] = true;
+            let tmpJson = {};
+            let lastPrice = result.average_price;
+            tmpJson.symbol = result.tradingsymbol;
+            tmpJson.qty = result.quantity;
+            tmpJson.order = "SL";
+            if (result.transaction_type === "BUY") {
+              let tempTriggerPrice = lastPrice - (lastPrice * stopLoss) / 100;
+              let triggerPrice = roundDownCalcualtion(tempTriggerPrice);
+              tmpJson.stopLossTrigger = triggerPrice;
+              tmpJson.orderType = "short";
+              let tmpLimitPrice =
+                triggerPrice - (triggerPrice * bufferAmount) / 100;
+              let limitPrice = roundUpCalcualtion(tmpLimitPrice);
+              tmpJson.price = limitPrice;
+              stockPlaceShort(tmpJson);
+            } else {
+              let tempTriggerPrice = lastPrice + (lastPrice * stopLoss) / 100;
+              let triggerPrice = roundUpCalcualtion(tempTriggerPrice);
+              tmpJson.stopLossTrigger = triggerPrice;
+              tmpJson.orderType = "long";
+              let tmpLimitPrice =
+                triggerPrice + (triggerPrice * bufferAmount) / 100;
+              let limitPrice = roundDownCalcualtion(tmpLimitPrice);
+              tmpJson.price = limitPrice;
+              stockPlaceBuy(tmpJson);
+            }
+            console.log("Innnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+            console.log(tmpJson);
+          }
+        });
       } catch (err) {
         console.log("Error in retreiving order", err);
       }
+      console.log("stoploss scheduler");
     }
   );
 };

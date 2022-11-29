@@ -260,6 +260,7 @@ const triggerSpreadStockBuy = schedule.scheduleJob(
 //   }
 // );
 
+// testManipulation();
 // callTriggerStopLossScheduler();
 /////////////////////////////////////////////////
 
