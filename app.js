@@ -82,16 +82,16 @@ global.roundUpCalcualtion = (price) => {
 };
 
 app.get("/getData", function (req, res) {
-  const count = 1437;
+  const count = 0;
   const config = {
     headers: {
-      Authorization: `enctoken o+CfaluD/bB7V95F/XIQToADaLWcegG1hoiYHpDDzibB1Y9afcCCnFKgvFtxGIkCW6AeN/b6bk/WD4iG79U3AZem5G+SFb/pXfpsIo98gVNZCxRHPxPiAg==`,
+      Authorization: `enctoken yjafGyI42gmlUuSiPgEQd/vZD/+MBXDX0yjvjw+Yzk16/116UdjfAHhAcf3ODNNd0ywkNJ9vpzOotL2mCrstYFZRrK6QvuKx2OZXrx1RbyVE4JxqsYYEwA==`,
     },
   };
 
   axios
     .get(
-      "https://kite.zerodha.com/oms/instruments/historical/884737/5minute?user_id=KG0260&oi=1&from=2022-10-13&to=2022-11-12",
+      "https://kite.zerodha.com/oms/instruments/historical/738561/minute?user_id=YB9930&oi=1&from=2022-11-29&to=2022-11-30",
       config
     )
     .then((response) => {
@@ -113,7 +113,7 @@ app.get("/getData", function (req, res) {
           stockLow: result[i][3],
           stockClose: result[i][4],
           stockVolume: result[i][5],
-          stockSymbol: "TATAMOTORS",
+          stockSymbol: "RELIANCE",
         };
         arr.push(tmpJson);
       }
@@ -246,12 +246,12 @@ app.get(
 );
 /////////////////////////////////////////////////////////////////
 
-const triggerSpreadStockBuy = schedule.scheduleJob(
-  "00 16 09 * * *",
-  async function () {
-    liveStocksCheckAndBuy();
-  }
-);
+// const triggerSpreadStockBuy = schedule.scheduleJob(
+//   "00 16 09 * * *",
+//   async function () {
+//     liveStocksCheckAndBuy();
+//   }
+// );
 ////////////////////////////////////////////////////
 // const triggerSpreadStockBuy = schedule.scheduleJob(
 //   "*/15 * * * * *",

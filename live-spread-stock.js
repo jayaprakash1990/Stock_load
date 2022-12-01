@@ -6,21 +6,23 @@ const { stockPlaceBuy } = require("./stock-place-long");
 const { symbols } = require("./symbol-token");
 const { stockPlaceShort } = require("./stock-place-short");
 
-// const stockSpreadApiUrl =
-//   "https://api.kite.trade/quote?i=NSE:TATAMOTORS&i=NSE:SBIN&i=NSE:TCS&i=NSE:RELIANCE";
-
 const stockSpreadApiUrl =
-  "https://api.kite.trade/quote?i=NSE:TATAMOTORS&i=NSE:SBIN";
+  "https://api.kite.trade/quote?i=NSE:TATAMOTORS&i=NSE:SBIN&i=NSE:TCS&i=NSE:RELIANCE";
 
-const capital = 500;
-const stockCount = 2;
-const bufferAmount = 0.05;
-const stopLoss = 0.05;
-const targetPlValue = 2500;
 const symbolStopLossStatus = {
   TATAMOTORS: false,
   SBIN: false,
+  RELIANCE: false,
+  TCS: false,
 };
+
+// const stockSpreadApiUrl =
+//   "https://api.kite.trade/quote?i=NSE:TATAMOTORS&i=NSE:SBIN";
+
+const capital = 10000;
+const stockCount = 4;
+const bufferAmount = 0.03;
+const stopLoss = 0.06;
 
 exports.liveStocksCheckAndBuy = () => {
   console.log("live spread stock started");

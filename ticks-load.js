@@ -2,12 +2,12 @@ const KiteTicker = require("kiteconnect").KiteTicker;
 const generic = require("./generic");
 const { TickModel, addTick, TickSchema } = require("./model");
 const sessionToken = require("./sessionToken.json");
-const { niftyFiftyItems } = require("./nifty-array");
+const { niftyFiftyItems, optionsToken } = require("./nifty-array");
 
 let ticker;
+let optionStockTokens = niftyFiftyItems.concat(optionsToken);
 
 exports.ticksLoad = () => {
-  let niftyValue = niftyFiftyItems;
   ticker = new KiteTicker({
     api_key: "ab1p4zkauvkxy4gt",
     access_token: sessionToken.access_token,
@@ -38,6 +38,6 @@ function onTicks(ticks) {
 
 function subscribe() {
   // const items = [ 884737, 895745, 2889473, 408065, 1346049, 794369, 738561 ];
-  ticker.subscribe(niftyFiftyItems);
-  ticker.setMode(ticker.modeFull, niftyFiftyItems);
+  ticker.subscribe(optionStockTokens);
+  ticker.setMode(ticker.modeFull, optionStockTokens);
 }
