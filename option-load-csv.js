@@ -5,7 +5,7 @@ const csvToJson = require("convert-csv-to-json");
 exports.addOptionCsv = () => {
   const count = 0;
   let fileName =
-    "11-17-NOV-WEEKLY-expiry_data_VEGE_NF_AND_BNF_Options_Vege.csv";
+    "28_OCT_03_NOV_WEEKLY_expiry_data_VEGE_NF_AND_BNF_Options_Vege.csv";
   let json = csvToJson
     .fieldDelimiter(",")
     .getJsonFromCsv("./stock-data/" + fileName);
@@ -67,7 +67,7 @@ exports.addOptionCsvWithDate = (startDate, endDate) => {
     //   isAddValue = true;
     //   // } else if (tickerValue.substr(0, 7) === "NIFTYWK") {
     // } else
-    if (tickerValue.substr(0, 5) === "NIFTY" && tickerValue !== "NIFTY") {
+    if (tickerValue.substr(0, 5) === "NIFTY" || tickerValue === "NIFTY") {
       isAddValue = true;
     }
 
@@ -90,7 +90,7 @@ exports.addOptionCsvWithDate = (startDate, endDate) => {
           stockLow: json[i].Low,
           stockVolume: json[i].Volume,
           stockDate: parseInt(t3),
-          stockSymbol: tmpTicker,
+          stockSymbol: tickerValue === "NIFTY" ? tickerValue : tmpTicker,
           stockOi: json[i].OpenInterest,
         };
         finalArr.push(tmpJson);
