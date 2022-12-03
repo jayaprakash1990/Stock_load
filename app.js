@@ -20,6 +20,13 @@ const schedule = require("node-schedule");
 const { testManipulation } = require("./test-manipulation");
 
 const { fetchVolumDataByStock } = require("./fetchTickData");
+const {
+  addOptionCsv,
+  fetchOptionByDate,
+  getOptionsDate,
+  fetchCurrentNiftyValue,
+  addOptionCsvWithDate,
+} = require("./option-load-csv");
 
 const bodyParser = require("body-parser");
 
@@ -168,7 +175,14 @@ app.post("/checkHighReversal", function (req, res) {
 ///////////////////////////////////////////////////////
 
 app.get("/importCsv", function (req, res) {
-  let value = addStockCsv();
+  let value = addOptionCsv();
+  res.json({ result: value });
+});
+
+app.get("/importCsvDate/:startDate/:endDate", function (req, res) {
+  let startDate = Number(req.params.startDate);
+  let endDate = Number(req.params.endDate);
+  let value = addOptionCsvWithDate(startDate, endDate);
   res.json({ result: value });
 });
 ///////////////////////////////////////////////////
@@ -179,6 +193,19 @@ app.get("/fetchStocksByDate/:startDate/:endDate", function (req, res) {
   let value = [];
   value = fetchStocksByDate(startDate, endDate, res);
 });
+///////////////////////////////////////////////////
+
+app.get(
+  "/fetchOptionsByDate/:startDate/:endDate/:ceOption/:peOption",
+  function (req, res) {
+    let startDate = Number(req.params.startDate);
+    let endDate = Number(req.params.endDate);
+    let ceOption = req.params.ceOption;
+    let peOption = req.params.peOption;
+
+    fetchOptionByDate(startDate, endDate, ceOption, peOption, res);
+  }
+);
 /////////////////////////////////////////////////////
 app.get("/testCall", function (req, res) {
   StockModel.find(
@@ -245,6 +272,14 @@ app.get(
   }
 );
 /////////////////////////////////////////////////////////////////
+app.get("/getOptionsDate", (req, res) => {
+  getOptionsDate(res);
+});
+///////////////////////////////////////////////////////////////
+app.get("/fetchCurrentNiftyValue/:date", (req, res) => {
+  fetchCurrentNiftyValue(req, res);
+});
+////////////////////////////////////////////////////////
 
 // const triggerSpreadStockBuy = schedule.scheduleJob(
 //   "00 16 09 * * *",
