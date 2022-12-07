@@ -26,6 +26,7 @@ const {
   getOptionsDate,
   fetchCurrentNiftyValue,
   addOptionCsvWithDate,
+  fetchNiftyPos,
 } = require("./option-load-csv");
 
 const bodyParser = require("body-parser");
@@ -280,6 +281,10 @@ app.get("/fetchCurrentNiftyValue/:date", (req, res) => {
   fetchCurrentNiftyValue(req, res);
 });
 ////////////////////////////////////////////////////////
+app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
+  fetchNiftyPos(req, res);
+});
+/////////////////////////////////////////////////////////
 
 // const triggerSpreadStockBuy = schedule.scheduleJob(
 //   "00 16 09 * * *",

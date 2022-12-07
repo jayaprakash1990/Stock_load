@@ -38,6 +38,6 @@ function onTicks(ticks) {
 
 function subscribe() {
   // const items = [ 884737, 895745, 2889473, 408065, 1346049, 794369, 738561 ];
-  ticker.subscribe(optionStockTokens);
-  ticker.setMode(ticker.modeFull, optionStockTokens);
+  ticker.subscribe(optionsToken);
+  ticker.setMode(ticker.modeFull, optionsToken);
 }

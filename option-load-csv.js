@@ -166,3 +166,29 @@ exports.fetchCurrentNiftyValue = (req, res) => {
       res.json(result);
     });
 };
+
+exports.fetchNiftyPos = (req, res) => {
+  let startDate = req.params.startDate;
+  let endDate = req.params.endDate;
+  console.log(startDate, endDate);
+  OptionModel.find({
+    stockSymbol: "NIFTY",
+    stockDate: { $gte: startDate, $lte: endDate },
+  })
+    .lean()
+    .exec(function (err4, result) {
+      if (err4) {
+        res.json(err4);
+      }
+      let highNifty = Math.max(...result.map((o) => o.stockHigh));
+      let lowNifty = Math.min(...result.map((o) => o.stockLow));
+
+      let averageNifty = (highNifty + lowNifty) / 2;
+      let closeNifty = result[result.length - 1].stockClose;
+      let niftyPos = closeNifty > averageNifty ? "long" : "short";
+
+      console.log(highNifty, lowNifty, averageNifty, closeNifty, niftyPos);
+
+      res.json({ highNifty, lowNifty, averageNifty, closeNifty, niftyPos });
+    });
+};
