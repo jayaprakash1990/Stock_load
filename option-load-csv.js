@@ -2,10 +2,12 @@ const mongoose = require("./mongoose-connector");
 const { OptionModel, addOptionTick } = require("./option-model");
 const csvToJson = require("convert-csv-to-json");
 
+////////09-16-SEP-2021-weekly-expiry_data__VEGE_NF_AND_BNF_Options
+//17-23-SEP-2021-weekly-expiry_data__VEGE_NF_AND_BNF_Options
+
 exports.addOptionCsv = () => {
   const count = 0;
-  let fileName =
-    "28_OCT_03_NOV_WEEKLY_expiry_data_VEGE_NF_AND_BNF_Options_Vege.csv";
+  let fileName = "01-07-JAN-2021-ExpiryWeekData_BNF_Options_Vege_amifeed.csv";
   let json = csvToJson
     .fieldDelimiter(",")
     .getJsonFromCsv("./stock-data/" + fileName);
@@ -51,7 +53,7 @@ exports.addOptionCsv = () => {
 
 exports.addOptionCsvWithDate = (startDate, endDate) => {
   const count = 0;
-  let fileName = "NOVEMBER-2022-MONTHLY-Expiry-data _Vege.csv";
+  let fileName = "mar-MONTHLY-Expirydata_NF_BNF_Options_2021_Amifeed_vege.csv";
   let json = csvToJson
     .fieldDelimiter(",")
     .getJsonFromCsv("./stock-data/" + fileName);
@@ -79,6 +81,7 @@ exports.addOptionCsvWithDate = (startDate, endDate) => {
       let t3 =
         t2Hyphen[2] + t2Hyphen[1] + t2Hyphen[0] + t3Colon[0] + t3Colon[1];
       let tmpTicker = tickerValue.substr(0, 5) + "WK" + tickerValue.substr(5);
+      // let tmpTicker = tickerValue.substr(0, 5) + tickerValue.substr(5);
 
       let tmpDateValue = parseInt(t3);
       if (tmpDateValue >= startDate && tmpDateValue <= endDate) {

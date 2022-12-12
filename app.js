@@ -63,7 +63,7 @@ process.env.TZ = "Asia/Kolkata";
 
 ///////////////////////////Load Ticks
 
-ticksLoad();
+// ticksLoad();
 
 global.tokenReturn = () => {
   // const contents = fs.readFileSync('./sessionToken.json', 'utf8');
