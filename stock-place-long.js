@@ -24,13 +24,13 @@ exports.stockPlaceBuy = (longJson) => {
   let dataJson = {
     tradingsymbol: longJson.symbol,
     order_type: longJson.order,
-    exchange: "NSE",
+    exchange: "NFO",
     transaction_type: "BUY",
     quantity: longJson.qty,
     product: "MIS",
     validity: "DAY",
     price: longJson.price,
-    trigger_price: longJson.stopLossTrigger,
+    // trigger_price: longJson.stopLossTrigger,
     // trigger_price: price
   };
 

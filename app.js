@@ -6,7 +6,7 @@ const moment = require("moment");
 const { StockModel, addTick } = require("./stock-model");
 const { Stock15Model, add15Tick } = require("./stock-model-15");
 const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
-const { ticksLoad } = require("./ticks-load");
+const { ticksLoad, liveShortStraddleOptionsTrigger } = require("./ticks-load");
 const fs = require("fs");
 const generic = require("./generic");
 const { liveStocksCheckAndBuy } = require("./live-spread-stock");
@@ -30,6 +30,11 @@ const {
 } = require("./option-load-csv");
 
 const bodyParser = require("body-parser");
+const {
+  liveShortStraddleOptions,
+  triggerOrderCheck,
+  fetchAndTriggerOrderCheck,
+} = require("./live-options-short");
 
 const port = 3001;
 
@@ -63,7 +68,7 @@ process.env.TZ = "Asia/Kolkata";
 
 ///////////////////////////Load Ticks
 
-// ticksLoad();
+ticksLoad();
 
 global.tokenReturn = () => {
   // const contents = fs.readFileSync('./sessionToken.json', 'utf8');
@@ -287,7 +292,7 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 /////////////////////////////////////////////////////////
 
 // const triggerSpreadStockBuy = schedule.scheduleJob(
-//   "00 16 09 * * *",
+//   "59 19 09 * * *",
 //   async function () {
 //     liveStocksCheckAndBuy();
 //   }
@@ -303,6 +308,31 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 // testManipulation();
 // callTriggerStopLossScheduler();
 /////////////////////////////////////////////////
+const triggerShortStraddle = schedule.scheduleJob(
+  "58 19 09 * * *",
+  async function () {
+    let url = "https://api.kite.trade/quote?i=NSE:NIFTY%2050";
+    axios
+      .get(url, config)
+      .then((response) => {
+        let niftyValue = response.data.data["NSE:NIFTY 50"].last_price;
+        liveShortStraddleOptions(niftyValue);
+      })
+      .catch((err) => console.log(err));
+  }
+);
+//////////////////////////////////////////////////
+
+////Manual Tigger option stop loss
+
+const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
+  "58 22 09 * * *",
+  async function () {
+    fetchAndTriggerOrderCheck();
+  }
+);
+
+//////////////////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)

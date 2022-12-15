@@ -16,13 +16,13 @@ exports.stockPlaceShort = (shortJson) => {
   let dataJson = {
     tradingsymbol: shortJson.symbol,
     order_type: shortJson.order,
-    exchange: "NSE",
+    exchange: "NFO",
     transaction_type: "SELL",
     quantity: shortJson.qty,
     product: "MIS",
     validity: "DAY",
     price: shortJson.price,
-    trigger_price: shortJson.stopLossTrigger,
+    // trigger_price: shortJson.stopLossTrigger,
   };
 
   axios
