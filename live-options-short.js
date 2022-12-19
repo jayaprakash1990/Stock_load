@@ -7,9 +7,9 @@ const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
 
-const symbolPrefix = "NIFTY22D15";
+const symbolPrefix = "NIFTY22D22";
 const bufferEntry = 0.75;
-const stopLoss = 20;
+const stopLoss = 40;
 const qty = 50;
 
 let shortOptionEntry = {
@@ -167,9 +167,34 @@ const triggerOrderCheck = (labelArr) => {
   );
 };
 
+exports.manualTiggerOptionStopLossCheck = () => {
+  OptionLiveModel.find({})
+    .sort({ label: 1 })
+    .exec(function (err4, results) {
+      if (err4) {
+        console.log(
+          "Problem in fetching entry data from database final data after enter"
+        );
+      }
+
+      let jsonResult = {};
+      let ceLabel = results[0].label;
+      let peLabel = results[1].label;
+      results.forEach((e) => {
+        jsonResult[e.label] = e;
+      });
+      OptionStopLossOrderTrigger({ ...jsonResult }, ceLabel, peLabel);
+      if (optionOrderCheckScheduler) {
+        optionOrderCheckScheduler.cancel();
+      }
+    });
+};
+
 let OptionStopLossScheduler;
 
 const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
+  console.log("#####OptionStopLossOrderTrigger###");
+  console.log(jResults, ceEntry, peEntry);
   let jsonResults = { ...jResults };
   let tceStopLoss = jsonResults[ceEntry].stopLoss;
   let tSellPrice = jsonResults[ceEntry].sellPrice;
@@ -180,11 +205,11 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   let slHitOption = {
     ce: {
       slHit: jsonResults[ceEntry].stopLossHit,
-      slValue: ceStopLoss,
+      slValue: jsonResults[peEntry].stopLossHit ? tSellPrice : ceStopLoss,
     },
     pe: {
       slHit: jsonResults[peEntry].stopLossHit,
-      slValue: peStopLoss,
+      slValue: jsonResults[ceEntry].stopLossHit ? pSellPrice : peStopLoss,
     },
   };
   OptionStopLossScheduler = schedule.scheduleJob(
@@ -199,9 +224,15 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
           let results = response.data.data;
           let ceLastPrice = results["NFO:" + ceEntry].last_price;
           let peLastPrice = results["NFO:" + peEntry].last_price;
+          let ceFinalLastPrice = roundUpCalcualtion(
+            ceLastPrice - (ceLastPrice * bufferEntry) / 100
+          );
+          let peFinalLastPrice = roundUpCalcualtion(
+            peLastPrice - (peLastPrice * bufferEntry) / 100
+          );
 
           if (ceLastPrice > slHitOption.ce.slValue && !slHitOption.ce.slHit) {
-            console.log("inside ce stop loss check");
+            console.log("inside ce stop loss check ", ceEntry);
             console.log("ce stop loss hit");
             slHitOption.ce.slHit = true;
             slHitOption.pe.slValue = pSellPrice;
@@ -210,9 +241,17 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
               symbol: ceEntry,
               order: "LIMIT",
               qty,
-              price: ceLastPrice,
+              price: ceFinalLastPrice,
             };
             stockPlaceBuy(bbJson);
+            OptionLiveModel.findOneAndUpdate(
+              { label: ceEntry },
+              { stopLossHit: true }
+            ).exec(function (err4, re1) {
+              if (err4) {
+                console.log("Problem in updating stop loss");
+              }
+            });
           }
 
           if (peLastPrice > slHitOption.pe.slValue && !slHitOption.pe.slHit) {
@@ -225,11 +264,30 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
               symbol: peEntry,
               order: "LIMIT",
               qty,
-              price: peLastPrice,
+              price: peFinalLastPrice,
             };
             stockPlaceBuy(bbJson);
+            OptionLiveModel.findOneAndUpdate(
+              { label: peEntry },
+              { stopLossHit: true }
+            ).exec(function (err4, re2) {
+              if (err4) {
+                console.log("Problem in updating stop loss");
+              }
+            });
           }
-          console.log(new Date(), ceLastPrice, peLastPrice, slHitOption);
+
+          if (slHitOption.ce.slHit && slHitOption.pe.slHit) {
+            OptionStopLossScheduler.cancel();
+          }
+          console.log(
+            new Date(),
+            ceLastPrice,
+            peLastPrice,
+            slHitOption,
+            ceFinalLastPrice,
+            peFinalLastPrice
+          );
         })
         .catch((err) => {
           console.log("Error in fetching the live 1 min CE and PE data");

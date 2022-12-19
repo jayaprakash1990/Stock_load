@@ -34,6 +34,7 @@ const {
   liveShortStraddleOptions,
   triggerOrderCheck,
   fetchAndTriggerOrderCheck,
+  manualTiggerOptionStopLossCheck,
 } = require("./live-options-short");
 
 const port = 3001;
@@ -309,7 +310,7 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 // callTriggerStopLossScheduler();
 /////////////////////////////////////////////////
 const triggerShortStraddle = schedule.scheduleJob(
-  "58 19 09 * * *",
+  "58 15 09 * * *",
   async function () {
     let url = "https://api.kite.trade/quote?i=NSE:NIFTY%2050";
     axios
@@ -323,16 +324,20 @@ const triggerShortStraddle = schedule.scheduleJob(
 );
 //////////////////////////////////////////////////
 
-////Manual Tigger option stop loss
-
 const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
-  "58 22 09 * * *",
+  "58 16 09 * * *",
   async function () {
     fetchAndTriggerOrderCheck();
   }
 );
 
 //////////////////////////////////////////////////
+
+////Manual Tigger option stop loss
+
+// manualTiggerOptionStopLossCheck();
+
+///////////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
