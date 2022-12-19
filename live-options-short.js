@@ -9,6 +9,7 @@ const { stockPlaceBuy } = require("./stock-place-long");
 
 const symbolPrefix = "NIFTY22D22";
 const bufferEntry = 0.75;
+const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
 
@@ -197,9 +198,9 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   console.log(jResults, ceEntry, peEntry);
   let jsonResults = { ...jResults };
   let tceStopLoss = jsonResults[ceEntry].stopLoss;
-  let tSellPrice = jsonResults[ceEntry].sellPrice;
+  let tSellPrice = jsonResults[ceEntry].bufferEntry;
   let tpeStopLoss = jsonResults[peEntry].stopLoss;
-  let pSellPrice = jsonResults[peEntry].sellPrice;
+  let pSellPrice = jsonResults[peEntry].bufferEntry;
   let ceStopLoss = tSellPrice + (tSellPrice * tceStopLoss) / 100;
   let peStopLoss = pSellPrice + (pSellPrice * tpeStopLoss) / 100;
   let slHitOption = {
@@ -225,10 +226,10 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
           let ceLastPrice = results["NFO:" + ceEntry].last_price;
           let peLastPrice = results["NFO:" + peEntry].last_price;
           let ceFinalLastPrice = roundUpCalcualtion(
-            ceLastPrice - (ceLastPrice * bufferEntry) / 100
+            ceLastPrice - (ceLastPrice * stopLossBuffer) / 100
           );
           let peFinalLastPrice = roundUpCalcualtion(
-            peLastPrice - (peLastPrice * bufferEntry) / 100
+            peLastPrice - (peLastPrice * stopLossBuffer) / 100
           );
 
           if (ceLastPrice > slHitOption.ce.slValue && !slHitOption.ce.slHit) {
@@ -294,4 +295,58 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
         });
     }
   );
+};
+
+exports.dayEndOptionStopLossCheck = () => {
+  console.log("Day end option trigger");
+  if (OptionStopLossScheduler) {
+    OptionStopLossScheduler.cancel();
+  }
+  OptionLiveModel.find({})
+    .sort({ label: 1 })
+    .exec(function (err4, res) {
+      if (err4) {
+        console.log(
+          "Problem in fetching entry data from database final data after enter"
+        );
+      }
+
+      console.log(res);
+      let url =
+        "https://api.kite.trade/quote?i=NFO:" +
+        res[0].label +
+        "&i=NFO:" +
+        res[1].label;
+
+      axios.get(url, headerConfig).then((response) => {
+        let results = response.data.data;
+
+        let ceLastPrice = results["NFO:" + res[0].label].last_price;
+        let peLastPrice = results["NFO:" + res[1].label].last_price;
+        let ceFinalLastPrice = roundUpCalcualtion(
+          ceLastPrice + (ceLastPrice * 0.1) / 100
+        );
+        let peFinalLastPrice = roundUpCalcualtion(
+          peLastPrice + (peLastPrice * 0.1) / 100
+        );
+        let ceJson = {
+          symbol: res[0].label,
+          order: "LIMIT",
+          qty,
+          price: ceFinalLastPrice,
+        };
+        if (!res[0].stopLossHit) {
+          stockPlaceBuy(ceJson);
+        }
+        let peJson = {
+          symbol: res[1].label,
+          order: "LIMIT",
+          qty,
+          price: peFinalLastPrice,
+        };
+        if (!res[1].stopLossHit) {
+          stockPlaceBuy(peJson);
+        }
+      });
+    });
 };
