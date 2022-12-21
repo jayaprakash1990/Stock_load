@@ -240,7 +240,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             //Buy
             let bbJson = {
               symbol: ceEntry,
-              order: "LIMIT",
+              order: "MARKET",
               qty,
               price: ceFinalLastPrice,
             };
@@ -263,7 +263,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             //Buy
             let bbJson = {
               symbol: peEntry,
-              order: "LIMIT",
+              order: "MARKET",
               qty,
               price: peFinalLastPrice,
             };
@@ -331,7 +331,7 @@ exports.dayEndOptionStopLossCheck = () => {
         );
         let ceJson = {
           symbol: res[0].label,
-          order: "LIMIT",
+          order: "MARKET",
           qty,
           price: ceFinalLastPrice,
         };
@@ -340,7 +340,7 @@ exports.dayEndOptionStopLossCheck = () => {
         }
         let peJson = {
           symbol: res[1].label,
-          order: "LIMIT",
+          order: "MARKET",
           qty,
           price: peFinalLastPrice,
         };
@@ -349,4 +349,17 @@ exports.dayEndOptionStopLossCheck = () => {
         }
       });
     });
+};
+
+exports.deleteOptionLiveSchema = () => {
+  OptionLiveModel.find({}).exec(function (err4, res) {
+    if (err4) {
+      console.log(
+        "Problem in fetching entry data from database final data after enter"
+      );
+    }
+    if (res.length > 0) {
+      OptionLiveModel.deleteMany({}).exec(function (err, res1) {});
+    }
+  });
 };

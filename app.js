@@ -36,6 +36,7 @@ const {
   fetchAndTriggerOrderCheck,
   manualTiggerOptionStopLossCheck,
   dayEndOptionStopLossCheck,
+  deleteOptionLiveSchema,
 } = require("./live-options-short");
 
 const port = 3001;
@@ -309,6 +310,15 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 
 // testManipulation();
 // callTriggerStopLossScheduler();
+////////////////////////////////////////////
+const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
+  "00 50 08 * * *",
+  async function () {
+    console.log("***************************");
+    deleteOptionLiveSchema();
+  }
+);
+
 /////////////////////////////////////////////////
 const triggerShortStraddle = schedule.scheduleJob(
   "59 15 09 * * *",
