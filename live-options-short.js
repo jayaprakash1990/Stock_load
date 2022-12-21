@@ -206,11 +206,13 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   let slHitOption = {
     ce: {
       slHit: jsonResults[ceEntry].stopLossHit,
-      slValue: jsonResults[peEntry].stopLossHit ? tSellPrice : ceStopLoss,
+      // slValue: jsonResults[peEntry].stopLossHit ? tSellPrice : ceStopLoss,
+      slValue: ceStopLoss,
     },
     pe: {
       slHit: jsonResults[peEntry].stopLossHit,
-      slValue: jsonResults[ceEntry].stopLossHit ? pSellPrice : peStopLoss,
+      // slValue: jsonResults[ceEntry].stopLossHit ? pSellPrice : peStopLoss,
+      slValue: peStopLoss,
     },
   };
   OptionStopLossScheduler = schedule.scheduleJob(
@@ -236,7 +238,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             console.log("inside ce stop loss check ", ceEntry);
             console.log("ce stop loss hit");
             slHitOption.ce.slHit = true;
-            slHitOption.pe.slValue = pSellPrice;
+            // slHitOption.pe.slValue = pSellPrice;
             //Buy
             let bbJson = {
               symbol: ceEntry,
@@ -259,7 +261,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             console.log("inside pe stop loss check");
             console.log("peStopLossHit");
             slHitOption.pe.slHit = true;
-            slHitOption.ce.slValue = tSellPrice;
+            // slHitOption.ce.slValue = tSellPrice;
             //Buy
             let bbJson = {
               symbol: peEntry,
