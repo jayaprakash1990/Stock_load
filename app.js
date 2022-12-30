@@ -312,7 +312,7 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 // callTriggerStopLossScheduler();
 ////////////////////////////////////////////
 const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
-  "00 50 08 * * *",
+  "00 02 09 * * *",
   async function () {
     console.log("***************************");
     deleteOptionLiveSchema();
@@ -336,7 +336,7 @@ const triggerShortStraddle = schedule.scheduleJob(
 //////////////////////////////////////////////////
 
 const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
-  "59 16 09 * * *",
+  "50 16 09 * * *",
   async function () {
     fetchAndTriggerOrderCheck();
   }
@@ -356,7 +356,7 @@ const dayEndOptionStopLossScheduler = schedule.scheduleJob(
 
 //////////////////////////////////////////////////
 
-////Manual Tigger option stop loss
+////Manual Tigger option stop loss - >  Manually need to uncomment for check order stop loss alternative for fetchAndTriggerOrderCheck
 
 // manualTiggerOptionStopLossCheck();
 

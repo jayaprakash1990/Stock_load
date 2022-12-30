@@ -7,7 +7,7 @@ const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
 
-const symbolPrefix = "NIFTY22D22";
+const symbolPrefix = "NIFTY23105";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
