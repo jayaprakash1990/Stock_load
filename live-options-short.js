@@ -7,7 +7,7 @@ const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
 
-const symbolPrefix = "NIFTY23105";
+const symbolPrefix = "NIFTY23119";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
@@ -216,17 +216,24 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
     },
   };
   OptionStopLossScheduler = schedule.scheduleJob(
+    // "*/20 * * * * *",
     "59 * * * * *",
     async function () {
       let url =
-        "https://api.kite.trade/quote?i=NFO:" + ceEntry + "&i=NFO:" + peEntry;
+        "https://api.kite.trade/quote?i=NFO:" +
+        ceEntry +
+        "&i=NFO:" +
+        peEntry +
+        "&i=NSE:NIFTY%2050";
 
       axios
         .get(url, headerConfig)
         .then((response) => {
           let results = response.data.data;
+
           let ceLastPrice = results["NFO:" + ceEntry].last_price;
           let peLastPrice = results["NFO:" + peEntry].last_price;
+          let nifyLastPrice = results["NSE:NIFTY 50"].last_price;
           let ceFinalLastPrice = roundUpCalcualtion(
             ceLastPrice - (ceLastPrice * stopLossBuffer) / 100
           );
@@ -283,14 +290,24 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
           if (slHitOption.ce.slHit && slHitOption.pe.slHit) {
             OptionStopLossScheduler.cancel();
           }
+          console.log("***************************************************");
+          console.log("                                                     ");
           console.log(
-            new Date(),
-            ceLastPrice,
-            peLastPrice,
-            slHitOption,
-            ceFinalLastPrice,
-            peFinalLastPrice
+            "Time : " +
+              new Date().getHours() +
+              ":" +
+              new Date().getMinutes() +
+              ":" +
+              new Date().getSeconds()
           );
+          console.log("Nifty : " + nifyLastPrice);
+          console.log("CE : " + ceLastPrice);
+          console.log("PE : " + peLastPrice);
+          console.log(slHitOption);
+          console.log(
+            "############################################################"
+          );
+          console.log("                                                 ");
         })
         .catch((err) => {
           console.log("Error in fetching the live 1 min CE and PE data");

@@ -350,17 +350,18 @@ const dayEndOptionStopLossScheduler = schedule.scheduleJob(
     dayEndOptionStopLossCheck();
   }
 );
-/////////////////////////////////////
-
-// dayEndOptionStopLossCheck();
-
-//////////////////////////////////////////////////
 
 ////Manual Tigger option stop loss - >  Manually need to uncomment for check order stop loss alternative for fetchAndTriggerOrderCheck
 
 // manualTiggerOptionStopLossCheck();
 
 ///////////////////////////////////////////
+
+////////////////////////Manually exit both the option at the same time
+
+// dayEndOptionStopLossCheck();
+
+////////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)
