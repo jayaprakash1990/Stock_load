@@ -226,7 +226,7 @@ const twoPositionExit = (jResults, ceEntry, peEntry) => {
           let ceCalculate = (ceEntryPrice - ceLastPrice) * qty;
           let peCalculate = (peEntryPrice - peLastPrice) * qty;
           let sum = ceCalculate + peCalculate;
-          console.log(sum, twoPositionExitValue);
+          console.log(parseInt(sum), twoPositionExitValue);
           if (sum > twoPositionExitValue) {
             console.log("Day Exitttttttttttt");
             if (OptionStopLossScheduler) {
