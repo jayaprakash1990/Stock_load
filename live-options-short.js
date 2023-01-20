@@ -7,11 +7,12 @@ const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
 
-const symbolPrefix = "NIFTY23119";
+const symbolPrefix = "NIFTY23JAN";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
+const twoPositionExitValue = 1300;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -185,10 +186,63 @@ exports.manualTiggerOptionStopLossCheck = () => {
         jsonResult[e.label] = e;
       });
       OptionStopLossOrderTrigger({ ...jsonResult }, ceLabel, peLabel);
+      if (
+        !jsonResult[ceLabel].stopLossHit &&
+        !jsonResult[peLabel].stopLossHit
+      ) {
+        twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+      }
       if (optionOrderCheckScheduler) {
         optionOrderCheckScheduler.cancel();
       }
     });
+};
+
+let twoPositionExitScheduler;
+
+const twoPositionExit = (jResults, ceEntry, peEntry) => {
+  console.log("#####Two Position Exit Scheduler###");
+  let jsonResults = { ...jResults };
+  let ceEntryPrice = jsonResults[ceEntry].sellPrice;
+  let peEntryPrice = jsonResults[peEntry].sellPrice;
+  twoPositionExitScheduler = schedule.scheduleJob(
+    "*/3 * * * * *",
+    async function () {
+      let url =
+        "https://api.kite.trade/quote?i=NFO:" +
+        ceEntry +
+        "&i=NFO:" +
+        peEntry +
+        "&i=NSE:NIFTY%2050";
+
+      axios
+        .get(url, headerConfig)
+        .then((response) => {
+          let results = response.data.data;
+
+          let ceLastPrice = results["NFO:" + ceEntry].last_price;
+          let peLastPrice = results["NFO:" + peEntry].last_price;
+          let nifyLastPrice = results["NSE:NIFTY 50"].last_price;
+          let ceCalculate = (ceEntryPrice - ceLastPrice) * qty;
+          let peCalculate = (peEntryPrice - peLastPrice) * qty;
+          let sum = ceCalculate + peCalculate;
+          console.log(sum, twoPositionExitValue);
+          if (sum > twoPositionExitValue) {
+            console.log("Day Exitttttttttttt");
+            if (OptionStopLossScheduler) {
+              OptionStopLossScheduler.cancel();
+            }
+            dayExitFunction();
+            if (twoPositionExitScheduler) {
+              twoPositionExitScheduler.cancel();
+            }
+          }
+        })
+        .catch((err) => {
+          console.log("Error in fetching the live 1 min CE and PE data");
+        });
+    }
+  );
 };
 
 let OptionStopLossScheduler;
@@ -244,6 +298,9 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
           if (ceLastPrice > slHitOption.ce.slValue && !slHitOption.ce.slHit) {
             console.log("inside ce stop loss check ", ceEntry);
             console.log("ce stop loss hit");
+            if (twoPositionExitScheduler) {
+              twoPositionExitScheduler.cancel();
+            }
             slHitOption.ce.slHit = true;
             // slHitOption.pe.slValue = pSellPrice;
             //Buy
@@ -267,6 +324,9 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
           if (peLastPrice > slHitOption.pe.slValue && !slHitOption.pe.slHit) {
             console.log("inside pe stop loss check");
             console.log("peStopLossHit");
+            if (twoPositionExitScheduler) {
+              twoPositionExitScheduler.cancel();
+            }
             slHitOption.pe.slHit = true;
             // slHitOption.ce.slValue = tSellPrice;
             //Buy
@@ -316,10 +376,13 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   );
 };
 
-exports.dayEndOptionStopLossCheck = () => {
+const dayExitFunction = () => {
   console.log("Day end option trigger");
   if (OptionStopLossScheduler) {
     OptionStopLossScheduler.cancel();
+  }
+  if (twoPositionExitScheduler) {
+    twoPositionExitScheduler.cancel();
   }
   OptionLiveModel.find({})
     .sort({ label: 1 })
@@ -368,6 +431,10 @@ exports.dayEndOptionStopLossCheck = () => {
         }
       });
     });
+};
+
+exports.dayEndOptionStopLossCheck = () => {
+  dayExitFunction();
 };
 
 exports.deleteOptionLiveSchema = () => {

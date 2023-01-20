@@ -344,12 +344,12 @@ const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
 
 /////////////////////////////////////////////
 
-const dayEndOptionStopLossScheduler = schedule.scheduleJob(
-  "02 10 15 * * *",
-  async function () {
-    dayEndOptionStopLossCheck();
-  }
-);
+// const dayEndOptionStopLossScheduler = schedule.scheduleJob(
+//   "02 10 15 * * *",
+//   async function () {
+//     dayEndOptionStopLossCheck();
+//   }
+// );
 
 ////Manual Tigger option stop loss - >  Manually need to uncomment for check order stop loss alternative for fetchAndTriggerOrderCheck
 
