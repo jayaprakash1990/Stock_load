@@ -43,6 +43,8 @@ const roundUpCalcualtion = (price) => {
   return Math.ceil(price * 20) / 20;
 };
 
+/////////This function to place the entry order for straddle or strangle
+
 exports.liveShortStraddleOptions = (niftyValue) => {
   let roundOffNiftyValue = Math.round(niftyValue / 50) * 50;
   let ce = symbolPrefix + roundOffNiftyValue + "CE";
@@ -91,6 +93,8 @@ exports.liveShortStraddleOptions = (niftyValue) => {
   ////////////////////
 };
 
+/////////This function calls from scheduler to check the order and scheduler will trigger to check stop loss
+
 exports.fetchAndTriggerOrderCheck = () => {
   OptionLiveModel.find({})
     .sort({ label: 1 })
@@ -108,6 +112,8 @@ exports.fetchAndTriggerOrderCheck = () => {
 };
 
 let optionOrderCheckScheduler;
+
+//////////////////////////to check the order and fetch all the details
 
 const triggerOrderCheck = (labelArr) => {
   optionOrderCheckScheduler = schedule.scheduleJob(
@@ -169,6 +175,8 @@ const triggerOrderCheck = (labelArr) => {
   );
 };
 
+/////////This function calls manually to check the order and scheduler will trigger to check stop loss
+
 exports.manualTiggerOptionStopLossCheck = () => {
   OptionLiveModel.find({})
     .sort({ label: 1 })
@@ -205,6 +213,8 @@ exports.manualTiggerOptionStopLossCheck = () => {
 };
 
 let twoPositionExitScheduler;
+
+/////////This function check the scheduler to exit the position if nothing hits stop loss
 
 const twoPositionExit = (jResults, ceEntry, peEntry) => {
   console.log("#####Two Position Exit Scheduler###");
@@ -252,6 +262,8 @@ const twoPositionExit = (jResults, ceEntry, peEntry) => {
 };
 
 let OptionStopLossScheduler;
+
+//////////////////////////Scheduler to check trigger stop loss
 
 const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   console.log("#####OptionStopLossOrderTrigger###");
@@ -382,6 +394,8 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   );
 };
 
+////////////////////////////Function to exit the position -  final call
+
 const dayExitFunction = () => {
   console.log("Day end option trigger");
   if (OptionStopLossScheduler) {
@@ -440,6 +454,8 @@ const dayExitFunction = () => {
     });
 };
 
+//////////////////////////updating stop loss  to true if all the position got exit
+
 const updateStopLossHit = () => {
   OptionLiveModel.updateMany({}, { stopLossHit: true }, { multi: true }).exec(
     function (err4, re1) {
@@ -450,6 +466,7 @@ const updateStopLossHit = () => {
   );
 };
 
+//////Day end position close call from scheduler
 exports.dayEndOptionStopLossCheck = () => {
   dayExitFunction();
 };
