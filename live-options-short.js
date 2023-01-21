@@ -12,7 +12,7 @@ const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
-const twoPositionExitValue = 1300;
+const twoPositionExitValue = 1250;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -185,7 +185,13 @@ exports.manualTiggerOptionStopLossCheck = () => {
       results.forEach((e) => {
         jsonResult[e.label] = e;
       });
-      OptionStopLossOrderTrigger({ ...jsonResult }, ceLabel, peLabel);
+      if (
+        !jsonResult[ceLabel].stopLossHit ||
+        !jsonResult[peLabel].stopLossHit
+      ) {
+        OptionStopLossOrderTrigger({ ...jsonResult }, ceLabel, peLabel);
+      }
+
       if (
         !jsonResult[ceLabel].stopLossHit &&
         !jsonResult[peLabel].stopLossHit
@@ -429,8 +435,19 @@ const dayExitFunction = () => {
         if (!res[1].stopLossHit) {
           stockPlaceBuy(peJson);
         }
+        updateStopLossHit();
       });
     });
+};
+
+const updateStopLossHit = () => {
+  OptionLiveModel.updateMany({}, { stopLossHit: true }, { multi: true }).exec(
+    function (err4, re1) {
+      if (err4) {
+        console.log("Problem in updating stop loss");
+      }
+    }
+  );
 };
 
 exports.dayEndOptionStopLossCheck = () => {
