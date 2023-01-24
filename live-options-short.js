@@ -12,7 +12,7 @@ const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
-const twoPositionExitValue = 1250;
+const twoPositionExitValue = 700;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -159,13 +159,27 @@ const triggerOrderCheck = (labelArr) => {
               results.forEach((e) => {
                 jsonResult[e.label] = e;
               });
-              OptionStopLossOrderTrigger(
-                { ...jsonResult },
-                results[0].label,
-                results[1].label
-              );
-
-              optionOrderCheckScheduler.cancel();
+              let ceLabel = results[0].label;
+              let peLabel = results[1].label;
+              if (
+                !jsonResult[ceLabel].stopLossHit ||
+                !jsonResult[peLabel].stopLossHit
+              ) {
+                OptionStopLossOrderTrigger(
+                  { ...jsonResult },
+                  results[0].label,
+                  results[1].label
+                );
+              }
+              if (
+                !jsonResult[ceLabel].stopLossHit &&
+                !jsonResult[peLabel].stopLossHit
+              ) {
+                twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+              }
+              if (optionOrderCheckScheduler) {
+                optionOrderCheckScheduler.cancel();
+              }
             });
         }
       } catch (e) {

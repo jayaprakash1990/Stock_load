@@ -6,7 +6,11 @@ const moment = require("moment");
 const { StockModel, addTick } = require("./stock-model");
 const { Stock15Model, add15Tick } = require("./stock-model-15");
 const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
-const { ticksLoad, liveShortStraddleOptionsTrigger } = require("./ticks-load");
+const {
+  ticksLoad,
+  liveShortStraddleOptionsTrigger,
+  loadOneMinuteData,
+} = require("./ticks-load");
 const fs = require("fs");
 const generic = require("./generic");
 const { liveStocksCheckAndBuy } = require("./live-spread-stock");
@@ -294,6 +298,11 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 });
 /////////////////////////////////////////////////////////
 
+app.get("/exportOneMinuteData", (req, res) => {
+  loadOneMinuteData(req, res);
+});
+
+//////////////////////////////////////////////////////
 // const triggerSpreadStockBuy = schedule.scheduleJob(
 //   "59 19 09 * * *",
 //   async function () {
@@ -362,6 +371,8 @@ const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
 // dayEndOptionStopLossCheck();
 
 ////////////////////////////////////////
+
+////////////////////////////////////////////////
 
 app.listen(port, () =>
   console.log(`Hello world app listening on port ${port}!`)

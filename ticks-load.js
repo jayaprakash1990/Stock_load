@@ -3,6 +3,7 @@ const generic = require("./generic");
 const { TickModel, addTick, TickSchema } = require("./model");
 const sessionToken = require("./sessionToken.json");
 const { niftyFiftyItems, optionsToken } = require("./nifty-array");
+const { instrumentTokens, optionsTokenSymbols } = require("./option-array");
 const { liveShortStraddleOptions } = require("./live-options-short");
 
 let ticker;
@@ -36,7 +37,7 @@ exports.ticksLoad = () => {
 };
 
 function onTicks(ticks) {
-  // addTick(ticks);
+  addTick(ticks);
 
   if (ticks[0]["instrument_token"] === 256265) {
     niftyValue = ticks[0].last_price;
@@ -45,11 +46,15 @@ function onTicks(ticks) {
 
 function subscribe() {
   // const items = [ 884737, 895745, 2889473, 408065, 1346049, 794369, 738561 ];
-  ticker.subscribe(optionsToken);
-  ticker.setMode(ticker.modeFull, optionsToken);
+  ticker.subscribe(instrumentTokens);
+  ticker.setMode(ticker.modeFull, instrumentTokens);
 }
 
 exports.liveShortStraddleOptionsTrigger = () => {
   console.log(niftyValue);
   liveShortStraddleOptions(niftyValue);
+};
+
+exports.loadOneMinuteData = (req, res) => {
+  res.send("OKay");
 };
