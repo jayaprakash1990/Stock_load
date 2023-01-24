@@ -8,7 +8,7 @@ let TickSchema = new Schema(
     last_price: { type: Number },
     volume: { type: Number },
     last_trade_time: { type: String },
-    timestamp: { type: String },
+    exchange_timestamp: { type: String },
   },
   {
     timestamps: true,

@@ -12,7 +12,7 @@ const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
-const twoPositionExitValue = 700;
+const twoPositionExitValue = 620;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },

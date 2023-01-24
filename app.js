@@ -9,7 +9,8 @@ const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
 const {
   ticksLoad,
   liveShortStraddleOptionsTrigger,
-  loadOneMinuteData,
+  loadOneMinuteBankData,
+  loadOneMinuteNiftyData,
 } = require("./ticks-load");
 const fs = require("fs");
 const generic = require("./generic");
@@ -74,8 +75,6 @@ app.use(function (req, res, next) {
 process.env.TZ = "Asia/Kolkata";
 
 ///////////////////////////Load Ticks
-
-ticksLoad();
 
 global.tokenReturn = () => {
   // const contents = fs.readFileSync('./sessionToken.json', 'utf8');
@@ -298,8 +297,18 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
 });
 /////////////////////////////////////////////////////////
 
-app.get("/exportOneMinuteData", (req, res) => {
-  loadOneMinuteData(req, res);
+/////////////////////////Nifty live stock to check
+
+ticksLoad();
+
+///////////////////////////////////
+
+app.get("/exportOneMinuteNiftyData", (req, res) => {
+  loadOneMinuteNiftyData(req, res);
+});
+
+app.get("/exportOneMinuteBankData", (req, res) => {
+  loadOneMinuteBankData(req, res);
 });
 
 //////////////////////////////////////////////////////
