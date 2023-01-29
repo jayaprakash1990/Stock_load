@@ -7,12 +7,13 @@ const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
 
-const symbolPrefix = "NIFTY23JAN";
+const symbolPrefix = "NIFTY23202";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
 const twoPositionExitValue = 620;
+const twoPositionNegativeValue = -500;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -74,13 +75,13 @@ exports.liveShortStraddleOptions = (niftyValue) => {
       arr.push(shortOptionEntry.peOption);
       let ceShort = {
         symbol: ce,
-        order: "LIMIT",
+        order: "MARKET",
         qty,
         price: ceBufferEntryValue,
       };
       let peShort = {
         symbol: pe,
-        order: "LIMIT",
+        order: "MARKET",
         qty,
         price: peBufferEntryValue,
       };
@@ -258,6 +259,17 @@ const twoPositionExit = (jResults, ceEntry, peEntry) => {
           let sum = ceCalculate + peCalculate;
           console.log(parseInt(sum), twoPositionExitValue);
           if (sum > twoPositionExitValue) {
+            console.log("Day Exitttttttttttt");
+            if (OptionStopLossScheduler) {
+              OptionStopLossScheduler.cancel();
+            }
+            dayExitFunction();
+            if (twoPositionExitScheduler) {
+              twoPositionExitScheduler.cancel();
+            }
+          }
+
+          if (sum < twoPositionNegativeValue) {
             console.log("Day Exitttttttttttt");
             if (OptionStopLossScheduler) {
               OptionStopLossScheduler.cancel();
@@ -447,7 +459,7 @@ const dayExitFunction = () => {
         );
         let ceJson = {
           symbol: res[0].label,
-          order: "MARKET",
+          order: "LIMIT",
           qty,
           price: ceFinalLastPrice,
         };
@@ -456,7 +468,7 @@ const dayExitFunction = () => {
         }
         let peJson = {
           symbol: res[1].label,
-          order: "MARKET",
+          order: "LIMIT",
           qty,
           price: peFinalLastPrice,
         };

@@ -1,5 +1,5 @@
 const { StockModel } = require("./stock-model");
-const { TickModel } = require("./model");
+const { TickModel } = require("../liveStock/model");
 
 exports.fetchVolumDataByStock = (req, res) => {
   const startDate = req.params.startDate;

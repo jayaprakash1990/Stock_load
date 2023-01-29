@@ -1,8 +1,8 @@
 const KiteTicker = require("kiteconnect").KiteTicker;
-const generic = require("./generic");
+const generic = require("../generic");
 const { TickModel, addTick, TickSchema } = require("./model");
-const sessionToken = require("./sessionToken.json");
-const { niftyFiftyItems, optionsToken } = require("./nifty-array");
+const sessionToken = require("../sessionToken.json");
+const { niftyFiftyItems, optionsToken } = require("../otherTest/nifty-array");
 const {
   instrumentTokens,
   optionsTokenSymbols,
@@ -10,6 +10,10 @@ const {
   optionsBankTokens,
 } = require("./option-array");
 const { liveShortStraddleOptions } = require("./live-options-short");
+const {
+  DataOptionNiftyModel,
+  addDataOptionNiftyTicks,
+} = require("./data-option-nifty-model");
 
 let ticker;
 let optionStockTokens = niftyFiftyItems.concat(optionsToken);
@@ -18,7 +22,7 @@ global.niftyValue = 0;
 
 exports.ticksLoad = () => {
   ticker = new KiteTicker({
-    api_key: "ab1p4zkauvkxy4gt",
+    api_key: "q4jcgtius5r3ekz5",
     access_token: sessionToken.access_token,
   });
 
@@ -60,9 +64,23 @@ exports.liveShortStraddleOptionsTrigger = () => {
   liveShortStraddleOptions(niftyValue);
 };
 
+// function removeDuplicates(myArr, prop) {
+//   return myArr.filter((obj, pos, arr) => {
+//     return arr.map((mapObj) => mapObj[prop]).indexOf(obj[prop]) === pos;
+//   });
+// }
+function removeDuplicates(myArr, property) {
+  let jsonTmp = {};
+  let resultArr = [];
+  myArr.array.forEach((element) => {
+    if (!(element.last_trade_time in jsonTmp)) {
+    }
+  });
+}
+
 exports.loadOneMinuteNiftyData = (req, res) => {
   let d = new Date();
-  d.setDate(d.getDate()); //remove in live
+  d.setDate(d.getDate() - 1); //remove in live
 
   let startDateArray = d.toString().split(" ");
   let endDateArray = d.toString().split(" ");
@@ -76,17 +94,21 @@ exports.loadOneMinuteNiftyData = (req, res) => {
 
   TickModel.find({
     // instrument_token: $in[optionNiftyTokens],
-    instrument_token: 256265,
-    // last_trade_time: { $gte: e, $lte: f },
+    instrument_token: 14309890,
+    last_trade_time: { $gte: e, $lte: f },
   })
-    .sort({ instrument_token: 1, last_trade_time: 1 })
+    .sort({ last_trade_time: 1 })
+    .lean()
     .exec(function (err4, res) {
       if (err4) {
         console.log(
           "Problem in fetching entry data from database final data after enter"
         );
       }
-      console.log(res);
+      console.log(res.length);
+      let resultArr = removeDuplicates(res, "last_trade_time");
+      console.log(resultArr);
+      console.log(resultArr.length);
     });
   res.send("Nifty OKay");
 };

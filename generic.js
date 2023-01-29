@@ -1,13 +1,13 @@
 const KiteConnect = require("kiteconnect").KiteConnect;
 
-const apiSecretAnother = "cotm4lkv3hpluwi3b58yzu0bw0fh5q41";
+const apiSecretAnother = "j751h7wqpjz8zx993xtf6fzyrcch4jtg";
 
 const kcAnother = new KiteConnect({
-  api_key: "ab1p4zkauvkxy4gt",
+  api_key: "q4jcgtius5r3ekz5",
 });
 
 const requestURL =
-  "https://kite.zerodha.com/connect/login?v=3&api_key=ab1p4zkauvkxy4gt";
+  "https://kite.zerodha.com/connect/login?v=3&api_key=q4jcgtius5r3ekz5";
 
 const generic = {
   kc: kcAnother,

@@ -2,9 +2,9 @@ const axios = require("axios");
 const qs = require("qs");
 const fs = require("fs");
 const schedule = require("node-schedule");
-const { stockPlaceBuy } = require("./stock-place-long");
+const { stockPlaceBuy } = require("../liveStock/stock-place-long");
 const { symbols } = require("./symbol-token");
-const { stockPlaceShort } = require("./stock-place-short");
+const { stockPlaceShort } = require("../liveStock/stock-place-short");
 
 const stockSpreadApiUrl =
   "https://api.kite.trade/quote?i=NSE:TATAMOTORS&i=NSE:SBIN&i=NSE:TCS&i=NSE:RELIANCE";

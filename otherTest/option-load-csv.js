@@ -1,4 +1,4 @@
-const mongoose = require("./mongoose-connector");
+const mongoose = require("../mongoose-connector");
 const { OptionModel, addOptionTick } = require("./option-model");
 const csvToJson = require("convert-csv-to-json");
 

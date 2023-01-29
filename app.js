@@ -3,28 +3,31 @@ const app = express();
 const axios = require("axios");
 const mongoose = require("./mongoose-connector");
 const moment = require("moment");
-const { StockModel, addTick } = require("./stock-model");
-const { Stock15Model, add15Tick } = require("./stock-model-15");
-const { addStockCsv, fetchStocksByDate } = require("./stock-load-csv");
+const { StockModel, addTick } = require("./otherTest/stock-model");
+const { Stock15Model, add15Tick } = require("./otherTest/stock-model-15");
+const {
+  addStockCsv,
+  fetchStocksByDate,
+} = require("./otherTest/stock-load-csv");
 const {
   ticksLoad,
   liveShortStraddleOptionsTrigger,
   loadOneMinuteBankData,
   loadOneMinuteNiftyData,
-} = require("./ticks-load");
+} = require("./liveStock/ticks-load");
 const fs = require("fs");
 const generic = require("./generic");
-const { liveStocksCheckAndBuy } = require("./live-spread-stock");
+const { liveStocksCheckAndBuy } = require("./otherTest/live-spread-stock");
 const {
   testCheckLowReversal,
   checkLowRev,
   testCheckHighReversl,
   checkHighRev,
-} = require("./spread-test");
+} = require("./otherTest/spread-test");
 const schedule = require("node-schedule");
-const { testManipulation } = require("./test-manipulation");
+const { testManipulation } = require("./otherTest/test-manipulation");
 
-const { fetchVolumDataByStock } = require("./fetchTickData");
+const { fetchVolumDataByStock } = require("./otherTest/fetchTickData");
 const {
   addOptionCsv,
   fetchOptionByDate,
@@ -32,7 +35,7 @@ const {
   fetchCurrentNiftyValue,
   addOptionCsvWithDate,
   fetchNiftyPos,
-} = require("./option-load-csv");
+} = require("./otherTest/option-load-csv");
 
 const bodyParser = require("body-parser");
 const {
@@ -42,7 +45,7 @@ const {
   manualTiggerOptionStopLossCheck,
   dayEndOptionStopLossCheck,
   deleteOptionLiveSchema,
-} = require("./live-options-short");
+} = require("./liveStock/live-options-short");
 
 const port = 3001;
 

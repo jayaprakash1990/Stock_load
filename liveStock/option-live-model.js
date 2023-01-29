@@ -1,4 +1,4 @@
-const mongoose = require("./mongoose-connector");
+const mongoose = require("../mongoose-connector");
 
 const Schema = mongoose.Schema;
 

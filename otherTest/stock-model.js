@@ -1,8 +1,8 @@
-const mongoose = require("./mongoose-connector");
+const mongoose = require("../mongoose-connector");
 
 const Schema = mongoose.Schema;
 
-let Stock15Schema = new Schema({
+let StockSchema = new Schema({
   stockId: { type: Number },
   stockOpen: { type: Number },
   stockHigh: { type: Number },
@@ -13,24 +13,24 @@ let Stock15Schema = new Schema({
   stockSymbol: { type: String },
 });
 
-Stock15Schema.index(
+StockSchema.index(
   { stockDate: 1, stockOpen: 1, stockHigh: 1, stockClose: 1, stockLow: 1 },
   { unique: true }
 );
 
-exports.Stock15Schema = Stock15Schema;
-let Stock15Model = mongoose.model("Stock15Schema", Stock15Schema);
+exports.StockSchema = StockSchema;
+let StockModel = mongoose.model("StockSchema", StockSchema);
 
-const add15Tick = (ticks) => {
+const addTick = (ticks) => {
   return new Promise((resolve, reject) => {
     // console.log('addTicks');
-    Stock15Model.insertMany(ticks, (err, res) => {
+    StockModel.insertMany(ticks, (err, res) => {
       err ? reject(err) : resolve(res);
     });
   });
 };
 
 module.exports = {
-  Stock15Model: Stock15Model,
-  add15Tick: add15Tick,
+  StockModel: StockModel,
+  addTick: addTick,
 };
