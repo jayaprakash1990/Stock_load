@@ -36,6 +36,10 @@ const {
   addOptionCsvWithDate,
   fetchNiftyPos,
 } = require("./otherTest/option-load-csv");
+const {
+  fetchCurrentHistoricNiftyValue,
+  fetchHistoricOptionByDate,
+} = require("./otherTest/historical/option-short-historic");
 
 const bodyParser = require("body-parser");
 const {
@@ -299,6 +303,22 @@ app.get("/fetchNiftyPos/:startDate/:endDate", (req, res) => {
   fetchNiftyPos(req, res);
 });
 /////////////////////////////////////////////////////////
+app.get("/fetchCurrentHistoricNiftyValue/:date", (req, res) => {
+  fetchCurrentHistoricNiftyValue(req, res);
+});
+
+app.get(
+  "/fetchHistoricOptionsByDate/:startDate/:endDate/:ceOption/:peOption",
+  function (req, res) {
+    let startDate = Number(req.params.startDate);
+    let endDate = Number(req.params.endDate);
+    let ceOption = req.params.ceOption;
+    let peOption = req.params.peOption;
+
+    fetchHistoricOptionByDate(startDate, endDate, ceOption, peOption, res);
+  }
+);
+//////////////////////////////////////////////////////////////
 
 /////////////////////////Nifty live stock to check
 
@@ -342,7 +362,8 @@ const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
 
 /////////////////////////////////////////////////
 const triggerShortStraddle = schedule.scheduleJob(
-  "59 15 09 * * *",
+  // "59 15 09 * * *",
+  "59 29 09 * * *",
   async function () {
     let url = "https://api.kite.trade/quote?i=NSE:NIFTY%2050";
     axios
@@ -357,7 +378,8 @@ const triggerShortStraddle = schedule.scheduleJob(
 //////////////////////////////////////////////////
 
 const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
-  "50 16 09 * * *",
+  // "50 16 09 * * *",
+  "50 30 09 * * *",
   async function () {
     fetchAndTriggerOrderCheck();
   }

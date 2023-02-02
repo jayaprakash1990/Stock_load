@@ -12,8 +12,8 @@ const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
-const twoPositionExitValue = 620;
-const twoPositionNegativeValue = -500;
+const twoPositionExitValue = 700;
+const twoPositionNegativeValue = -600;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -177,6 +177,7 @@ const triggerOrderCheck = (labelArr) => {
                 !jsonResult[peLabel].stopLossHit
               ) {
                 twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+                twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
               }
               if (optionOrderCheckScheduler) {
                 optionOrderCheckScheduler.cancel();
@@ -220,6 +221,7 @@ exports.manualTiggerOptionStopLossCheck = () => {
         !jsonResult[peLabel].stopLossHit
       ) {
         twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+        twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
       }
       if (optionOrderCheckScheduler) {
         optionOrderCheckScheduler.cancel();
@@ -228,6 +230,8 @@ exports.manualTiggerOptionStopLossCheck = () => {
 };
 
 let twoPositionExitScheduler;
+
+let twoPositionStopLossScheduler;
 
 /////////This function check the scheduler to exit the position if nothing hits stop loss
 
@@ -267,7 +271,49 @@ const twoPositionExit = (jResults, ceEntry, peEntry) => {
             if (twoPositionExitScheduler) {
               twoPositionExitScheduler.cancel();
             }
+            if (twoPositionStopLossScheduler) {
+              twoPositionStopLossScheduler.cancel();
+            }
           }
+        })
+        .catch((err) => {
+          console.log("Error in fetching the live 1 min CE and PE data");
+        });
+    }
+  );
+};
+
+const twoPositionStopLoss = (jResults, ceEntry, peEntry) => {
+  console.log("#####Two Position Exit Stop Loss Scheduler###");
+  let jsonResults = { ...jResults };
+  let ceEntryPrice = jsonResults[ceEntry].sellPrice;
+  let peEntryPrice = jsonResults[peEntry].sellPrice;
+  twoPositionStopLossScheduler = schedule.scheduleJob(
+    "59 * * * * *",
+    async function () {
+      let url =
+        "https://api.kite.trade/quote?i=NFO:" +
+        ceEntry +
+        "&i=NFO:" +
+        peEntry +
+        "&i=NSE:NIFTY%2050";
+
+      axios
+        .get(url, headerConfig)
+        .then((response) => {
+          let results = response.data.data;
+
+          let ceLastPrice = results["NFO:" + ceEntry].last_price;
+          let peLastPrice = results["NFO:" + peEntry].last_price;
+          let nifyLastPrice = results["NSE:NIFTY 50"].last_price;
+          let ceCalculate = (ceEntryPrice - ceLastPrice) * qty;
+          let peCalculate = (peEntryPrice - peLastPrice) * qty;
+          let sum = ceCalculate + peCalculate;
+          console.log(
+            "Two  Position Stop Loss Sceduler ",
+            parseInt(sum),
+            twoPositionExitValue
+          );
 
           if (sum < twoPositionNegativeValue) {
             console.log("Day Exitttttttttttt");
@@ -277,6 +323,9 @@ const twoPositionExit = (jResults, ceEntry, peEntry) => {
             dayExitFunction();
             if (twoPositionExitScheduler) {
               twoPositionExitScheduler.cancel();
+            }
+            if (twoPositionStopLossScheduler) {
+              twoPositionStopLossScheduler.cancel();
             }
           }
         })
@@ -345,6 +394,9 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             if (twoPositionExitScheduler) {
               twoPositionExitScheduler.cancel();
             }
+            if (twoPositionStopLossScheduler) {
+              twoPositionStopLossScheduler.cancel();
+            }
             slHitOption.ce.slHit = true;
             // slHitOption.pe.slValue = pSellPrice;
             //Buy
@@ -370,6 +422,9 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
             console.log("peStopLossHit");
             if (twoPositionExitScheduler) {
               twoPositionExitScheduler.cancel();
+            }
+            if (twoPositionStopLossScheduler) {
+              twoPositionStopLossScheduler.cancel();
             }
             slHitOption.pe.slHit = true;
             // slHitOption.ce.slValue = tSellPrice;
@@ -429,6 +484,9 @@ const dayExitFunction = () => {
   }
   if (twoPositionExitScheduler) {
     twoPositionExitScheduler.cancel();
+  }
+  if (twoPositionStopLossScheduler) {
+    twoPositionStopLossScheduler.cancel();
   }
   OptionLiveModel.find({})
     .sort({ label: 1 })

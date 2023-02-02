@@ -2,18 +2,13 @@ const mongoose = require("../mongoose-connector");
 
 const Schema = mongoose.Schema;
 
-let TickSchema = new Schema(
-  {
-    instrument_token: { type: Number },
-    last_price: { type: Number },
-    volume: { type: Number },
-    last_trade_time: { type: String },
-    exchange_timestamp: { type: String },
-  },
-  {
-    timestamps: true,
-  }
-);
+let TickSchema = new Schema({
+  instrument_token: { type: Number },
+  last_price: { type: Number },
+  timeStamp: { type: Number },
+  symbol: { type: String },
+  exchange_timestamp: { type: String },
+});
 
 exports.TickSchema = TickSchema;
 let TickModel = mongoose.model("TickSchema", TickSchema);
