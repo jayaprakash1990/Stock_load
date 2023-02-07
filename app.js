@@ -375,6 +375,7 @@ const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
     console.log("***************************");
     deleteOptionLiveSchema();
     tickSchemaDelete();
+    updateTrailingStopLoss(-1000);
   }
 );
 
