@@ -1,8 +1,9 @@
-const { HistoricalModel } = require("./historical.model");
+const { HistoricalModel, addHistoricalTick } = require("./historical.model");
 
 exports.fetchCurrentHistoricNiftyValue = (req, res) => {
   let startDate = parseInt(req.params.date);
-  startDate = startDate - 1;
+  console.log("fetchCurrentHistoricNiftyValue  ", startDate);
+  // startDate = startDate - 1;
 
   HistoricalModel.findOne({ symbol: "NIFTYTY", timeStamp: startDate })
     .lean()
@@ -51,5 +52,33 @@ exports.fetchHistoricOptionByDate = (
       }
 
       res.json(finalJson);
+    });
+};
+
+exports.loadHistoricOptionData = () => {
+  HistoricalModel.find()
+    .lean()
+    .exec(function (err4, results) {
+      if (err4) {
+        res.json(err4);
+      }
+
+      let arr = [];
+      results.forEach((e) => {
+        let tJson = {
+          instrument_token: parseFloat(e.instrument_token),
+          last_price: parseFloat(e.last_price),
+          timeStamp: parseFloat(e.timeStamp),
+          symbol: e.symbol,
+          exchange_timestamp: e.exchange_timestamp,
+        };
+        arr.push(tJson);
+      });
+      HistoricalModel.deleteMany({}).exec(function (err1, res1) {
+        if (err1) {
+          console.log("Error while deleting Historical Model");
+        }
+        addHistoricalTick(arr);
+      });
     });
 };

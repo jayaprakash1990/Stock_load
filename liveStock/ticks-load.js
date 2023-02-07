@@ -54,29 +54,31 @@ function onTicks(ticks) {
   let arr = [];
   if (ticks[0].exchange_timestamp && ticks[0].exchange_timestamp !== null) {
     ticks.forEach((element) => {
-      let t1 = new Date(element.exchange_timestamp);
-      let t2 = element.exchange_timestamp.toString().split(" ")[4].split(":");
-      let tmpDateStamp =
-        t1.getFullYear().toString() +
-        t1.getMonth().toString() +
-        1 +
-        t1.getDate().toString();
-      let tmpTimeStamp = t2[0] + t2[1] + t2[2];
-      let tmpDateTimeStamp = tmpDateStamp + tmpTimeStamp;
-      let token = element.instrument_token;
+      if (element.exchange_timestamp) {
+        let t1 = new Date(element.exchange_timestamp);
+        let t2 = element.exchange_timestamp.toString().split(" ")[4].split(":");
+        let tmpDateStamp =
+          t1.getFullYear().toString() +
+          t1.getMonth().toString() +
+          1 +
+          t1.getDate().toString();
+        let tmpTimeStamp = t2[0] + t2[1] + t2[2];
+        let tmpDateTimeStamp = tmpDateStamp + tmpTimeStamp;
+        let token = element.instrument_token;
 
-      let tmpJson = {
-        instrument_token: element.instrument_token,
-        last_price: element.last_price,
-        timeStamp: tmpDateTimeStamp,
-        symbol:
-          optionsTokenSymbols[token].type +
-          optionsTokenSymbols[token].symbol.substr(
-            optionsTokenSymbols[token].symbol.length - 7
-          ),
-        exchange_timestamp: element.exchange_timestamp,
-      };
-      arr.push(tmpJson);
+        let tmpJson = {
+          instrument_token: element.instrument_token,
+          last_price: element.last_price,
+          timeStamp: tmpDateTimeStamp,
+          symbol:
+            optionsTokenSymbols[token].type +
+            optionsTokenSymbols[token].symbol.substr(
+              optionsTokenSymbols[token].symbol.length - 7
+            ),
+          exchange_timestamp: element.exchange_timestamp,
+        };
+        arr.push(tmpJson);
+      }
     });
     addTick(arr);
   }

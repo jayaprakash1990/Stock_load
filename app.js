@@ -39,6 +39,7 @@ const {
 const {
   fetchCurrentHistoricNiftyValue,
   fetchHistoricOptionByDate,
+  loadHistoricOptionData,
 } = require("./otherTest/historical/option-short-historic");
 
 const bodyParser = require("body-parser");
@@ -49,7 +50,14 @@ const {
   manualTiggerOptionStopLossCheck,
   dayEndOptionStopLossCheck,
   deleteOptionLiveSchema,
+  tickSchemaDelete,
 } = require("./liveStock/live-options-short");
+
+const {
+  addTrailingStopLoss,
+  updateTrailingStopLoss,
+  findTrailingStopLoss,
+} = require("./liveStock/trailing-stop-loss-model");
 
 const port = 3001;
 
@@ -334,6 +342,14 @@ app.get("/exportOneMinuteBankData", (req, res) => {
   loadOneMinuteBankData(req, res);
 });
 
+app.get("/loadHistoricOptionData", (req, res) => {
+  loadHistoricOptionData();
+  res.send("Okay");
+});
+
+// addTrailingStopLoss({ stopLossValue: -1000 });
+// updateTrailingStopLoss(-500);
+
 //////////////////////////////////////////////////////
 // const triggerSpreadStockBuy = schedule.scheduleJob(
 //   "59 19 09 * * *",
@@ -351,19 +367,21 @@ app.get("/exportOneMinuteBankData", (req, res) => {
 
 // testManipulation();
 // callTriggerStopLossScheduler();
+// findTrailingStopLoss();
 ////////////////////////////////////////////
 const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
   "00 02 09 * * *",
   async function () {
     console.log("***************************");
     deleteOptionLiveSchema();
+    tickSchemaDelete();
   }
 );
 
 /////////////////////////////////////////////////
 const triggerShortStraddle = schedule.scheduleJob(
   // "59 15 09 * * *",
-  "59 29 09 * * *",
+  "59 15 09 * * *",
   async function () {
     let url = "https://api.kite.trade/quote?i=NSE:NIFTY%2050";
     axios
@@ -379,7 +397,7 @@ const triggerShortStraddle = schedule.scheduleJob(
 
 const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
   // "50 16 09 * * *",
-  "50 30 09 * * *",
+  "50 16 09 * * *",
   async function () {
     fetchAndTriggerOrderCheck();
   }

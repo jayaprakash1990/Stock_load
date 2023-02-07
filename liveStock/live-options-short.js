@@ -6,14 +6,23 @@ const schedule = require("node-schedule");
 const optionLiveModel = require("./option-live-model");
 const { off } = require("process");
 const { stockPlaceBuy } = require("./stock-place-long");
+const { TickModel } = require("./model");
 
-const symbolPrefix = "NIFTY23202";
+const {
+  addTrailingStopLoss,
+  updateTrailingStopLoss,
+  findTrailingStopLoss,
+  TrailingStopLossModel,
+} = require("./trailing-stop-loss-model");
+
+const symbolPrefix = "NIFTY23209";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
-const stopLoss = 40;
-const qty = 50;
-const twoPositionExitValue = 700;
-const twoPositionNegativeValue = -600;
+const stopLoss = 60;
+const qty = 100;
+const twoPositionExitValue = 1200;
+let trailingStopLoss = -1000;
+let fixedTrailingStopLoss = -1000;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -87,11 +96,24 @@ exports.liveShortStraddleOptions = (niftyValue) => {
       };
       stockPlaceShort(ceShort);
       stockPlaceShort(peShort);
+      updateTrailingStopLoss(trailingStopLoss);
       addValue(arr);
     })
     .catch((err) => console.log(err));
 
   ////////////////////
+};
+////////////////////////////////////////////////////////////////
+
+const findTrailingStopLossPrimary = () => {
+  TrailingStopLossModel.find().exec(function (err4, results) {
+    if (err4) {
+      res.json(err4);
+      trailingStopLoss = -1000;
+    }
+    // console.log(results[0].stopLossValue);
+    trailingStopLoss = results[0].stopLossValue;
+  });
 };
 
 /////////This function calls from scheduler to check the order and scheduler will trigger to check stop loss
@@ -117,6 +139,7 @@ let optionOrderCheckScheduler;
 //////////////////////////to check the order and fetch all the details
 
 const triggerOrderCheck = (labelArr) => {
+  // findTrailingStopLossPrimary;
   optionOrderCheckScheduler = schedule.scheduleJob(
     "*/5 * * * * *",
     async function () {
@@ -194,6 +217,7 @@ const triggerOrderCheck = (labelArr) => {
 /////////This function calls manually to check the order and scheduler will trigger to check stop loss
 
 exports.manualTiggerOptionStopLossCheck = () => {
+  // findTrailingStopLossPrimary;
   OptionLiveModel.find({})
     .sort({ label: 1 })
     .exec(function (err4, results) {
@@ -237,50 +261,69 @@ let twoPositionStopLossScheduler;
 
 const twoPositionExit = (jResults, ceEntry, peEntry) => {
   console.log("#####Two Position Exit Scheduler###");
-  let jsonResults = { ...jResults };
-  let ceEntryPrice = jsonResults[ceEntry].sellPrice;
-  let peEntryPrice = jsonResults[peEntry].sellPrice;
-  twoPositionExitScheduler = schedule.scheduleJob(
-    "*/3 * * * * *",
-    async function () {
-      let url =
-        "https://api.kite.trade/quote?i=NFO:" +
-        ceEntry +
-        "&i=NFO:" +
-        peEntry +
-        "&i=NSE:NIFTY%2050";
-
-      axios
-        .get(url, headerConfig)
-        .then((response) => {
-          let results = response.data.data;
-
-          let ceLastPrice = results["NFO:" + ceEntry].last_price;
-          let peLastPrice = results["NFO:" + peEntry].last_price;
-          let nifyLastPrice = results["NSE:NIFTY 50"].last_price;
-          let ceCalculate = (ceEntryPrice - ceLastPrice) * qty;
-          let peCalculate = (peEntryPrice - peLastPrice) * qty;
-          let sum = ceCalculate + peCalculate;
-          console.log(parseInt(sum), twoPositionExitValue);
-          if (sum > twoPositionExitValue) {
-            console.log("Day Exitttttttttttt");
-            if (OptionStopLossScheduler) {
-              OptionStopLossScheduler.cancel();
-            }
-            dayExitFunction();
-            if (twoPositionExitScheduler) {
-              twoPositionExitScheduler.cancel();
-            }
-            if (twoPositionStopLossScheduler) {
-              twoPositionStopLossScheduler.cancel();
-            }
-          }
-        })
-        .catch((err) => {
-          console.log("Error in fetching the live 1 min CE and PE data");
-        });
+  TrailingStopLossModel.find().exec(function (err4, results) {
+    if (err4) {
+      res.json(err4);
+      trailingStopLoss = -1000;
     }
-  );
+    console.log(results[0].stopLossValue);
+    trailingStopLoss = results[0].stopLossValue;
+
+    let jsonResults = { ...jResults };
+    let ceEntryPrice = jsonResults[ceEntry].sellPrice;
+    let peEntryPrice = jsonResults[peEntry].sellPrice;
+    twoPositionExitScheduler = schedule.scheduleJob(
+      "*/3 * * * * *",
+      async function () {
+        let url =
+          "https://api.kite.trade/quote?i=NFO:" +
+          ceEntry +
+          "&i=NFO:" +
+          peEntry +
+          "&i=NSE:NIFTY%2050";
+
+        axios
+          .get(url, headerConfig)
+          .then((response) => {
+            let results = response.data.data;
+
+            let ceLastPrice = results["NFO:" + ceEntry].last_price;
+            let peLastPrice = results["NFO:" + peEntry].last_price;
+            let nifyLastPrice = results["NSE:NIFTY 50"].last_price;
+            let ceCalculate = (ceEntryPrice - ceLastPrice) * qty;
+            let peCalculate = (peEntryPrice - peLastPrice) * qty;
+            let sum = ceCalculate + peCalculate;
+
+            if (sum > twoPositionExitValue) {
+              console.log("Day Exitttttttttttt");
+              if (OptionStopLossScheduler) {
+                OptionStopLossScheduler.cancel();
+              }
+              dayExitFunction();
+              if (twoPositionExitScheduler) {
+                twoPositionExitScheduler.cancel();
+              }
+              if (twoPositionStopLossScheduler) {
+                twoPositionStopLossScheduler.cancel();
+              }
+            }
+
+            let trailingStopLossCalculate = sum + fixedTrailingStopLoss;
+            console.log(trailingStopLossCalculate, trailingStopLoss);
+            if (trailingStopLossCalculate > trailingStopLoss) {
+              updateTrailingStopLoss(trailingStopLossCalculate);
+
+              trailingStopLoss = trailingStopLossCalculate;
+            }
+            console.log("Target ", parseInt(sum), twoPositionExitValue);
+            console.log("Trailing Stop Loss ", trailingStopLoss);
+          })
+          .catch((err) => {
+            console.log("Error in fetching the live 1 min CE and PE data");
+          });
+      }
+    );
+  });
 };
 
 const twoPositionStopLoss = (jResults, ceEntry, peEntry) => {
@@ -312,10 +355,10 @@ const twoPositionStopLoss = (jResults, ceEntry, peEntry) => {
           console.log(
             "Two  Position Stop Loss Sceduler ",
             parseInt(sum),
-            twoPositionExitValue
+            trailingStopLoss
           );
 
-          if (sum < twoPositionNegativeValue) {
+          if (sum < trailingStopLoss) {
             console.log("Day Exitttttttttttt");
             if (OptionStopLossScheduler) {
               OptionStopLossScheduler.cancel();
@@ -364,7 +407,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   };
   OptionStopLossScheduler = schedule.scheduleJob(
     // "*/20 * * * * *",
-    "59 * * * * *",
+    "55 * * * * *",
     async function () {
       let url =
         "https://api.kite.trade/quote?i=NFO:" +
@@ -564,6 +607,19 @@ exports.deleteOptionLiveSchema = () => {
     }
     if (res.length > 0) {
       OptionLiveModel.deleteMany({}).exec(function (err, res1) {});
+    }
+  });
+};
+
+exports.tickSchemaDelete = () => {
+  TickModel.find({}).exec(function (err4, res) {
+    if (err4) {
+      console.log(
+        "Problem in fetching entry data from database final data after enter"
+      );
+    }
+    if (res.length > 0) {
+      TickModel.deleteMany({}).exec(function (err, res1) {});
     }
   });
 };
