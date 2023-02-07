@@ -96,7 +96,7 @@ exports.liveShortStraddleOptions = (niftyValue) => {
       };
       stockPlaceShort(ceShort);
       stockPlaceShort(peShort);
-      updateTrailingStopLoss(trailingStopLoss);
+      // updateTrailingStopLoss(trailingStopLoss);
       addValue(arr);
     })
     .catch((err) => console.log(err));
