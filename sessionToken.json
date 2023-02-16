@@ -1,1 +1,19 @@
-{"user_type":"individual","email":"jp.ravichandran1990@gmail.com","user_name":"Gnanasekaran Sujithra","user_shortname":"Gnanasekaran","broker":"ZERODHA","exchanges":["NSE","MF","BSE","NFO"],"products":["CNC","NRML","MIS","BO","CO"],"order_types":["MARKET","LIMIT","SL","SL-M"],"avatar_url":null,"user_id":"KG0260","api_key":"q4jcgtius5r3ekz5","access_token":"Eth6NqB3U5S19TLIbCptLTQvp08t2Gd0","public_token":"GOvj7yyEwWr7kMrkQ0Xh1xebe8S7pqO1","refresh_token":"","enctoken":"Jdo45KOXyLY8HgR0r7DblP2iP6c2K8RCxslhvnKsrTWkpNiseMLFSu+QyQADuagHSVrHmwdN3XPxv3ZPC0emVAc2CpGw3w1h+VUkzc3n+KS0DQRp3gkPkN//bcsqQfY=","login_time":"2023-02-07T00:00:40.000Z","meta":{"demat_consent":"consent"}}
+{
+  "user_type": "individual",
+  "email": "jp.ravichandran1990@gmail.com",
+  "user_name": "Gnanasekaran Sujithra",
+  "user_shortname": "Gnanasekaran",
+  "broker": "ZERODHA",
+  "exchanges": ["NSE", "MF", "BSE", "NFO"],
+  "products": ["CNC", "NRML", "MIS", "BO", "CO"],
+  "order_types": ["MARKET", "LIMIT", "SL", "SL-M"],
+  "avatar_url": null,
+  "user_id": "KG0260",
+  "api_key": "q4jcgtius5r3ekz5",
+  "access_token": "9IBa88IJhTuTiqMb3E6NaRKZ1OjNKI5v",
+  "public_token": "dgBRIBOoWNSFoVqXddHNSyyDzAC2spQD",
+  "refresh_token": "",
+  "enctoken": "Hzu5WlpWCSIPl4l9GHf1/p0EXWBBuuQqSWTs1Uycu8I8JEv/cpX/QS/3eIsx4bs3Nl0l6YKuKr4wf4mMGPzNKF/zpgpObJYHrktDXVNkL3RgvAK19tb/oupspsYaWZY=",
+  "login_time": "2023-02-16T00:57:45.000Z",
+  "meta": { "demat_consent": "consent" }
+}

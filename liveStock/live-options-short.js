@@ -15,14 +15,14 @@ const {
   TrailingStopLossModel,
 } = require("./trailing-stop-loss-model");
 
-const symbolPrefix = "NIFTY23209";
+const symbolPrefix = "NIFTY23FEB";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
-const stopLoss = 60;
-const qty = 100;
-const twoPositionExitValue = 1200;
-let trailingStopLoss = -1000;
-let fixedTrailingStopLoss = -1000;
+const stopLoss = 40;
+const qty = 50;
+const twoPositionExitValue = 900;
+let trailingStopLoss = -5000;
+let fixedTrailingStopLoss = -5000;
 
 let shortOptionEntry = {
   ceOption: { stopLoss, stopLossHit: false, qty },
@@ -199,8 +199,8 @@ const triggerOrderCheck = (labelArr) => {
                 !jsonResult[ceLabel].stopLossHit &&
                 !jsonResult[peLabel].stopLossHit
               ) {
-                twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
-                twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
+                // twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+                // twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
               }
               if (optionOrderCheckScheduler) {
                 optionOrderCheckScheduler.cancel();
@@ -244,8 +244,8 @@ exports.manualTiggerOptionStopLossCheck = () => {
         !jsonResult[ceLabel].stopLossHit &&
         !jsonResult[peLabel].stopLossHit
       ) {
-        twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
-        twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
+        // twoPositionExit({ ...jsonResult }, ceLabel, peLabel);
+        // twoPositionStopLoss({ ...jsonResult }, ceLabel, peLabel);
       }
       if (optionOrderCheckScheduler) {
         optionOrderCheckScheduler.cancel();
@@ -407,7 +407,7 @@ const OptionStopLossOrderTrigger = (jResults, ceEntry, peEntry) => {
   };
   OptionStopLossScheduler = schedule.scheduleJob(
     // "*/20 * * * * *",
-    "55 * * * * *",
+    "59 * * * * *",
     async function () {
       let url =
         "https://api.kite.trade/quote?i=NFO:" +
@@ -560,7 +560,7 @@ const dayExitFunction = () => {
         );
         let ceJson = {
           symbol: res[0].label,
-          order: "LIMIT",
+          order: "MARKET",
           qty,
           price: ceFinalLastPrice,
         };
@@ -569,7 +569,7 @@ const dayExitFunction = () => {
         }
         let peJson = {
           symbol: res[1].label,
-          order: "LIMIT",
+          order: "MARKET",
           qty,
           price: peFinalLastPrice,
         };

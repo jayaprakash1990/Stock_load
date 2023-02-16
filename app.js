@@ -4,6 +4,7 @@ const axios = require("axios");
 const mongoose = require("./mongoose-connector");
 const moment = require("moment");
 const { StockModel, addTick } = require("./otherTest/stock-model");
+const csvToJson = require("convert-csv-to-json");
 const { Stock15Model, add15Tick } = require("./otherTest/stock-model-15");
 const {
   addStockCsv,
@@ -35,6 +36,8 @@ const {
   fetchCurrentNiftyValue,
   addOptionCsvWithDate,
   fetchNiftyPos,
+  loadOptionSchemasData,
+  loadOptionSchemasDataFromCsv,
 } = require("./otherTest/option-load-csv");
 const {
   fetchCurrentHistoricNiftyValue,
@@ -58,6 +61,7 @@ const {
   updateTrailingStopLoss,
   findTrailingStopLoss,
 } = require("./liveStock/trailing-stop-loss-model");
+const { addOptionTick } = require("./otherTest/option-model");
 
 const port = 3001;
 
@@ -265,7 +269,7 @@ app.get("/testCall", function (req, res) {
 
 app.get("/writeInCsv/:value", function (req, res) {
   let value = req.params.value;
-  fs.appendFileSync("testSample.csv", value);
+  fs.appendFileSync("./otherTest/testSample.csv", value);
   res.json({ result: "success" });
 });
 ////////////////////////////////////////////////////
@@ -347,6 +351,41 @@ app.get("/loadHistoricOptionData", (req, res) => {
   res.send("Okay");
 });
 
+app.get("/loadOptionSchemasData", (req, res) => {
+  loadOptionSchemasData();
+  res.send("Okay");
+});
+app.get("/loadOptionSchemasDataFromCsv", (req, res) => {
+  // loadOptionSchemasDataFromCsv();
+  loadOptionSchemasDataFromCsvTest();
+  res.send("Okay");
+});
+
+const loadOptionSchemasDataFromCsvTest = () => {
+  console.log(1111111111);
+  let fileName = "testOption.csv";
+  let json = csvToJson
+    .fieldDelimiter(",")
+    .getJsonFromCsv("./otherTest/stock-data/" + fileName);
+  // console.log(json);
+  let finalArr = [];
+  json.forEach((e) => {
+    let tJson = {
+      stockClose: parseFloat(e.stockClose),
+      stockDate: parseFloat(e.stockDate),
+      stockHigh: parseFloat(e.stockHigh),
+      stockId: parseFloat(e.stockId),
+      stockLow: parseFloat(e.stockLow),
+      stockOpen: parseFloat(e.stockOpen),
+      stockSymbol: e.stockSymbol,
+    };
+    finalArr.push(tJson);
+  });
+
+  console.log(finalArr.length);
+  addOptionTick(finalArr);
+};
+
 // addTrailingStopLoss({ stopLossValue: -1000 });
 // updateTrailingStopLoss(-500);
 
@@ -381,7 +420,6 @@ const deleteOptionLiveSchemaScheduler = schedule.scheduleJob(
 
 /////////////////////////////////////////////////
 const triggerShortStraddle = schedule.scheduleJob(
-  // "59 15 09 * * *",
   "59 15 09 * * *",
   async function () {
     let url = "https://api.kite.trade/quote?i=NSE:NIFTY%2050";
@@ -397,7 +435,6 @@ const triggerShortStraddle = schedule.scheduleJob(
 //////////////////////////////////////////////////
 
 const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
-  // "50 16 09 * * *",
   "50 16 09 * * *",
   async function () {
     fetchAndTriggerOrderCheck();
@@ -406,12 +443,12 @@ const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
 
 /////////////////////////////////////////////
 
-// const dayEndOptionStopLossScheduler = schedule.scheduleJob(
-//   "02 10 15 * * *",
-//   async function () {
-//     dayEndOptionStopLossCheck();
-//   }
-// );
+const dayEndOptionStopLossScheduler = schedule.scheduleJob(
+  "02 10 15 * * *",
+  async function () {
+    dayEndOptionStopLossCheck();
+  }
+);
 
 ////Manual Tigger option stop loss - >  Manually need to uncomment for check order stop loss alternative for fetchAndTriggerOrderCheck
 

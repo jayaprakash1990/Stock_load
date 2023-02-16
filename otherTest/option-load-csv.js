@@ -195,3 +195,54 @@ exports.fetchNiftyPos = (req, res) => {
       res.json({ highNifty, lowNifty, averageNifty, closeNifty, niftyPos });
     });
 };
+
+exports.loadOptionSchemasData = () => {
+  OptionModel.find()
+    .lean()
+    .exec(function (err4, results) {
+      if (err4) {
+        res.json(err4);
+      }
+
+      let arr = [];
+      results.forEach((e) => {
+        let tJson = {
+          stockClose: parseFloat(e.stockClose),
+          stockDate: parseFloat(e.stockDate),
+          stockHigh: parseFloat(e.stockHigh),
+          stockId: parseFloat(e.stockId),
+          stockLow: parseFloat(e.stockLow),
+          stockOpen: parseFloat(e.stockOpen),
+          stockSymbol: e.stockSymbol,
+        };
+        arr.push(tJson);
+      });
+      OptionModel.deleteMany({}).exec(function (err1, res1) {
+        if (err1) {
+          console.log("Error while deleting Historical Model");
+        }
+        addOptionTick(arr);
+      });
+    });
+};
+
+exports.loadOptionSchemasDataFromCsv = () => {
+  let fileName = "testOption";
+  let json = csvToJson
+    .fieldDelimiter(",")
+    .getJsonFromCsv("./otherTest/stock-data/" + fileName);
+
+  let finalArr = [];
+  for (let e = 0; e < json.length; e++) {
+    let tJson = {
+      stockClose: parseFloat(e.stockClose),
+      stockDate: parseFloat(e.stockDate),
+      stockHigh: parseFloat(e.stockHigh),
+      stockId: parseFloat(e.stockId),
+      stockLow: parseFloat(e.stockLow),
+      stockOpen: parseFloat(e.stockOpen),
+      stockSymbol: e.stockSymbol,
+    };
+    finalArr.push(tJson);
+  }
+};
