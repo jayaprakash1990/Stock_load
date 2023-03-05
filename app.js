@@ -446,7 +446,7 @@ const fetchAndTriggerOrderCheckScheduler = schedule.scheduleJob(
 const dayEndOptionStopLossScheduler = schedule.scheduleJob(
   "02 10 15 * * *",
   async function () {
-    dayEndOptionStopLossCheck();
+    // dayEndOptionStopLossCheck();
   }
 );
 

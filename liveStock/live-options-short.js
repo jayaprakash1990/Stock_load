@@ -15,12 +15,12 @@ const {
   TrailingStopLossModel,
 } = require("./trailing-stop-loss-model");
 
-const symbolPrefix = "NIFTY23FEB";
+const symbolPrefix = "NIFTY23309";
 const bufferEntry = 0.75;
 const stopLossBuffer = 0.5;
 const stopLoss = 40;
 const qty = 50;
-const twoPositionExitValue = 900;
+const twoPositionExitValue = 1000;
 let trailingStopLoss = -5000;
 let fixedTrailingStopLoss = -5000;
 
